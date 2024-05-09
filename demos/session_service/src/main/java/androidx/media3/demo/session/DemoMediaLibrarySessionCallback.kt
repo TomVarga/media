@@ -44,11 +44,11 @@ open class DemoMediaLibrarySessionCallback(context: Context) :
   private val customLayoutCommandButtons: List<CommandButton> =
     listOf(
       CommandButton.Builder(CommandButton.ICON_SHUFFLE_OFF)
-        .setDisplayName(context.getString(R.string.exo_controls_shuffle_on_description))
+        .setDisplayName(context.getString(androidx.media3.ui.R.string.exo_controls_shuffle_on_description))
         .setSessionCommand(SessionCommand(CUSTOM_COMMAND_TOGGLE_SHUFFLE_MODE_ON, Bundle.EMPTY))
         .build(),
       CommandButton.Builder(CommandButton.ICON_SHUFFLE_ON)
-        .setDisplayName(context.getString(R.string.exo_controls_shuffle_off_description))
+        .setDisplayName(context.getString(androidx.media3.ui.R.string.exo_controls_shuffle_off_description))
         .setSessionCommand(SessionCommand(CUSTOM_COMMAND_TOGGLE_SHUFFLE_MODE_OFF, Bundle.EMPTY))
         .build(),
     )
@@ -63,6 +63,11 @@ open class DemoMediaLibrarySessionCallback(context: Context) :
         }
       }
       .build()
+
+    @UnstableApi
+    override fun onPlaybackResumption(mediaSession: MediaSession, controller: MediaSession.ControllerInfo): ListenableFuture<MediaItemsWithStartPosition> {
+        return Futures.immediateFuture(MediaItemsWithStartPosition(emptyList(), 0, 0))
+    }
 
   // ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS
   // ConnectionResult.AcceptedResultBuilder

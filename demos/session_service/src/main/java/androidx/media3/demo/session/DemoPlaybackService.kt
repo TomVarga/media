@@ -19,8 +19,10 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,6 +36,11 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSession.ControllerInfo
 
 open class DemoPlaybackService : MediaLibraryService() {
+
+  override fun onTaskRemoved(rootIntent: Intent?) {
+    Log.d("DemoPlaybackService", "onTaskRemoved: ")
+    super.onTaskRemoved(rootIntent)
+  }
 
   private lateinit var mediaLibrarySession: MediaLibrarySession
 
@@ -93,6 +100,7 @@ open class DemoPlaybackService : MediaLibraryService() {
   // MediaSessionService.clearListener
   @OptIn(UnstableApi::class)
   override fun onDestroy() {
+    Log.d("DemoPlaybackService", "onDestroy: ")
     getBackStackedActivity()?.let { mediaLibrarySession.setSessionActivity(it) }
     mediaLibrarySession.release()
     mediaLibrarySession.player.release()
@@ -134,7 +142,7 @@ open class DemoPlaybackService : MediaLibraryService() {
       ensureNotificationChannel(notificationManagerCompat)
       val builder =
         NotificationCompat.Builder(this@DemoPlaybackService, CHANNEL_ID)
-          .setSmallIcon(R.drawable.media3_notification_small_icon)
+          .setSmallIcon(androidx.media3.session.R.drawable.media3_notification_small_icon)
           .setContentTitle(getString(R.string.notification_content_title))
           .setStyle(
             NotificationCompat.BigTextStyle().bigText(getString(R.string.notification_content_text))
