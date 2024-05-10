@@ -37,10 +37,15 @@ import androidx.media3.session.MediaSession.ControllerInfo
 
 open class DemoPlaybackService : MediaLibraryService() {
 
-  override fun onTaskRemoved(rootIntent: Intent?) {
-    Log.d("DemoPlaybackService", "onTaskRemoved: ")
-    super.onTaskRemoved(rootIntent)
-  }
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        Log.d("DemoPlaybackService", "onTaskRemoved: ")
+        val player = mediaLibrarySession.player
+        if (player.playWhenReady) {
+            // Make sure the service is not in foreground.
+            player.pause()
+        }
+        stopSelf()
+    }
 
   private lateinit var mediaLibrarySession: MediaLibrarySession
 

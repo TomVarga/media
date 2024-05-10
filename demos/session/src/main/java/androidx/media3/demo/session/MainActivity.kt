@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -93,6 +94,7 @@ class MainActivity : AppCompatActivity() {
     ) {
       requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), /* requestCode= */ 0)
     }
+    Log.d("SingletonValueHolder", "onCreate: someValue ${SingletonValueHolder.someValue}")
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {

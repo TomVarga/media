@@ -91,6 +91,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun initializeController() {
+    SingletonValueHolder.someValue = true
     controllerFuture =
       MediaController.Builder(
           this,
