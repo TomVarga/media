@@ -17,6 +17,7 @@ package androidx.media3.exoplayer.upstream;
 
 import static java.lang.Math.min;
 
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.media3.common.C;
 import androidx.media3.common.ParserException;
@@ -117,13 +118,17 @@ public class DefaultLoadErrorHandlingPolicy implements LoadErrorHandlingPolicy {
   @Override
   public long getRetryDelayMsFor(LoadErrorInfo loadErrorInfo) {
     IOException exception = loadErrorInfo.exception;
-    return exception instanceof ParserException
-            || exception instanceof FileNotFoundException
-            || exception instanceof CleartextNotPermittedException
-            || exception instanceof UnexpectedLoaderException
-            || DataSourceException.isCausedByPositionOutOfRange(exception)
+    long delay = exception instanceof ParserException
+        || exception instanceof FileNotFoundException
+        || exception instanceof CleartextNotPermittedException
+        || exception instanceof UnexpectedLoaderException
+        || DataSourceException.isCausedByPositionOutOfRange(exception)
         ? C.TIME_UNSET
         : min((loadErrorInfo.errorCount - 1) * 1000, 5000);
+    Log.d("tag",             "getRetryDelayMs delay" + delay + "for errorCount " + loadErrorInfo.errorCount +
+        "uri " + loadErrorInfo.loadEventInfo.dataSpec.uri + " exception " + exception
+    );
+    return delay;
   }
 
   /**

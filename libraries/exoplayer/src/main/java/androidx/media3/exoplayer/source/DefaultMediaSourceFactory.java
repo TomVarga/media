@@ -98,7 +98,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  * configure the factory with the required providers.
  */
 @SuppressWarnings("deprecation") // Implement deprecated type for backwards compatibility.
-public final class DefaultMediaSourceFactory implements MediaSourceFactory {
+public class DefaultMediaSourceFactory implements MediaSourceFactory {
 
   /**
    * @deprecated Use {@link AdsLoader.Provider} instead.
@@ -111,7 +111,7 @@ public final class DefaultMediaSourceFactory implements MediaSourceFactory {
 
   private final DelegateFactoryLoader delegateFactoryLoader;
 
-  private DataSource.Factory dataSourceFactory;
+  protected DataSource.Factory dataSourceFactory;
   private SubtitleParser.Factory subtitleParserFactory;
   @Nullable private MediaSource.Factory serverSideAdInsertionMediaSourceFactory;
   @Nullable private ExternalLoader externalImageLoader;

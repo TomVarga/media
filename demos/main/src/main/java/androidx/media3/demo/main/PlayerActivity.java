@@ -315,7 +315,7 @@ public class PlayerActivity extends AppCompatActivity
             serverSideAdsLoader,
             new DefaultMediaSourceFactory(/* context= */ this)
                 .setDataSourceFactory(dataSourceFactory));
-    return new DefaultMediaSourceFactory(/* context= */ this)
+    return new HlsCustomizingMediaSourceFactory(/* context= */ this)
         .setDataSourceFactory(dataSourceFactory)
         .setDrmSessionManagerProvider(drmSessionManagerProvider)
         .setLocalAdInsertionComponents(
@@ -509,7 +509,7 @@ public class PlayerActivity extends AppCompatActivity
     @OptIn(markerClass = UnstableApi.class) // Using decoder exceptions
     @Override
     public Pair<Integer, String> getErrorMessage(PlaybackException e) {
-      String errorString = getString(R.string.error_generic);
+      String errorString = getString(R.string.error_generic) + e.getLocalizedMessage() + " " + e.getCause().getMessage();
       Throwable cause = e.getCause();
       if (cause instanceof DecoderInitializationException) {
         // Special case for decoder initialization failures.
