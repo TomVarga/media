@@ -52,7 +52,7 @@ public abstract class WrappingMediaSource extends CompositeMediaSource<Void> {
   private static final Void CHILD_SOURCE_ID = null;
 
   /** The wrapped child {@link MediaSource}. */
-  protected final MediaSource mediaSource;
+  public final MediaSource mediaSource;
 
   /**
    * Creates the wrapping {@link MediaSource}.

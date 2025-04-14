@@ -38,7 +38,7 @@ import java.util.Objects;
 @UnstableApi
 public abstract class CompositeMediaSource<T> extends BaseMediaSource {
 
-  private final HashMap<T, MediaSourceAndListener<T>> childSources;
+  protected final HashMap<T, MediaSourceAndListener<T>> childSources;
 
   @Nullable private Handler eventHandler;
   @Nullable private TransferListener mediaTransferListener;
@@ -204,7 +204,7 @@ public abstract class CompositeMediaSource<T> extends BaseMediaSource {
     return mediaTimeMs;
   }
 
-  private static final class MediaSourceAndListener<T> {
+  protected static final class MediaSourceAndListener<T> {
 
     public final MediaSource mediaSource;
     public final MediaSourceCaller caller;

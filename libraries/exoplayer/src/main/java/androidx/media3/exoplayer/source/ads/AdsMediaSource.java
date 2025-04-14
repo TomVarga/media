@@ -22,6 +22,7 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import androidx.annotation.CallSuper;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.media3.common.AdPlaybackState;
@@ -349,6 +350,21 @@ public final class AdsMediaSource extends CompositeMediaSource<MediaPeriodId> {
     // The child id for the content period is just CHILD_SOURCE_MEDIA_PERIOD_ID. That's why
     // we need to forward the reported mediaPeriodId in this case.
     return childSourceId.isAd() ? childSourceId : mediaPeriodId;
+  }
+
+  @Override
+  @CallSuper
+  public void maybeThrowSourceInfoRefreshError() throws IOException {
+    super.maybeThrowSourceInfoRefreshError();
+    for (MediaSourceAndListener<?> childSource : childSources.values()) {
+      MediaSource mediaSource = childSource.mediaSource;
+      if (mediaSource instanceof MaskingMediaSource) {
+        MaskingMediaSource maskingMediaSource = (MaskingMediaSource) mediaSource;
+        maskingMediaSource.mediaSource.maybeThrowSourceInfoRefreshError();
+      } else {
+        mediaSource.maybeThrowSourceInfoRefreshError();
+      }
+    }
   }
 
   // Internal methods.
