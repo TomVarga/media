@@ -15,6 +15,7 @@
  */
 package androidx.media3.exoplayer.hls.playlist;
 
+import androidx.media3.exoplayer.hls.playlist.InterstitialMarker;
 import static androidx.media3.common.util.Assertions.checkNotNull;
 import static androidx.media3.common.util.Assertions.checkState;
 import static androidx.media3.common.util.Util.castNonNull;
@@ -105,6 +106,7 @@ public final class HlsPlaylistParser implements ParsingLoadable.Parser<HlsPlayli
   private static final String TAG_SKIP = "#EXT-X-SKIP";
   private static final String TAG_PRELOAD_HINT = "#EXT-X-PRELOAD-HINT";
   private static final String TAG_RENDITION_REPORT = "#EXT-X-RENDITION-REPORT";
+  private static final String TAG_INTERSTITIAL = "#EXT-X-INTERSTITIAL";
 
   private static final String TYPE_AUDIO = "AUDIO";
   private static final String TYPE_VIDEO = "VIDEO";
@@ -224,6 +226,8 @@ public final class HlsPlaylistParser implements ParsingLoadable.Parser<HlsPlayli
   private static final Pattern REGEX_IMPORT = Pattern.compile("IMPORT=\"(.+?)\"");
   private static final Pattern REGEX_VARIABLE_REFERENCE =
       Pattern.compile("\\{\\$([a-zA-Z0-9\\-_]+)\\}");
+  // TODO: Define a more specific pattern for interstitial attributes
+  private static final Pattern REGEX_INTERSTITIAL = Pattern.compile(TAG_INTERSTITIAL + ":(.+)");
 
   private final HlsMultivariantPlaylist multivariantPlaylist;
   @Nullable private final HlsMediaPlaylist previousMediaPlaylist;
@@ -652,6 +656,7 @@ public final class HlsPlaylistParser implements ParsingLoadable.Parser<HlsPlayli
     @Nullable Part preloadPart = null;
     List<RenditionReport> renditionReports = new ArrayList<>();
     List<String> tags = new ArrayList<>();
+    List<InterstitialMarker> currentInterstitialMarkers = new ArrayList<>();
 
     long segmentDurationUs = 0;
     String segmentTitle = "";
@@ -1006,7 +1011,10 @@ public final class HlsPlaylistParser implements ParsingLoadable.Parser<HlsPlayli
                 segmentByteRangeOffset,
                 segmentByteRangeLength,
                 hasGapTag,
-                trailingParts));
+                trailingParts,
+                new ArrayList<>(currentInterstitialMarkers) // Pass collected interstitial markers
+                ));
+        currentInterstitialMarkers.clear(); // Clear for the next segment
         segmentStartTimeUs += segmentDurationUs;
         partStartTimeUs = segmentStartTimeUs;
         segmentDurationUs = 0;
@@ -1017,6 +1025,14 @@ public final class HlsPlaylistParser implements ParsingLoadable.Parser<HlsPlayli
         }
         segmentByteRangeLength = C.LENGTH_UNSET;
         hasGapTag = false;
+      } else if (line.startsWith(TAG_INTERSTITIAL)) {
+        // TODO: Implement proper parsing for interstitial attributes.
+        // String attributes = parseStringAttr(line, REGEX_INTERSTITIAL, variableDefinitions);
+        // InterstitialMarker marker = parseInterstitialAttributes(attributes);
+        // if (marker != null) {
+        //   currentInterstitialMarkers.add(marker);
+        // }
+        Log.d(LOG_TAG, "Found interstitial tag: " + line);
       }
     }
 

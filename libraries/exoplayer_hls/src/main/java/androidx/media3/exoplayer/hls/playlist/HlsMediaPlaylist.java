@@ -17,6 +17,7 @@ package androidx.media3.exoplayer.hls.playlist;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import androidx.media3.exoplayer.hls.playlist.InterstitialMarker;
 import static java.lang.annotation.ElementType.TYPE_USE;
 
 import android.net.Uri;
@@ -103,6 +104,9 @@ public final class HlsMediaPlaylist extends HlsPlaylist {
     /** The parts belonging to this segment. */
     public final List<Part> parts;
 
+    /** Information about interstitial markers within this segment. */
+    public final ImmutableList<InterstitialMarker> interstitialMarkers;
+
     /**
      * Creates an instance to be used as init segment.
      *
@@ -131,7 +135,8 @@ public final class HlsMediaPlaylist extends HlsPlaylist {
           byteRangeOffset,
           byteRangeLength,
           /* hasGapTag= */ false,
-          /* parts= */ ImmutableList.of());
+          /* parts= */ ImmutableList.of(),
+          /* interstitialMarkers= */ ImmutableList.of());
     }
 
     /**
@@ -164,7 +169,8 @@ public final class HlsMediaPlaylist extends HlsPlaylist {
         long byteRangeOffset,
         long byteRangeLength,
         boolean hasGapTag,
-        List<Part> parts) {
+        List<Part> parts,
+        List<InterstitialMarker> interstitialMarkers) { // Keep List here for flexibility
       super(
           url,
           initializationSegment,
@@ -179,6 +185,7 @@ public final class HlsMediaPlaylist extends HlsPlaylist {
           hasGapTag);
       this.title = title;
       this.parts = ImmutableList.copyOf(parts);
+      this.interstitialMarkers = ImmutableList.copyOf(interstitialMarkers); // Store as ImmutableList
     }
 
     public Segment copyWith(long relativeStartTimeUs, int relativeDiscontinuitySequence) {
@@ -202,7 +209,8 @@ public final class HlsMediaPlaylist extends HlsPlaylist {
           byteRangeOffset,
           byteRangeLength,
           hasGapTag,
-          updatedParts);
+          updatedParts,
+          interstitialMarkers);
     }
   }
 
