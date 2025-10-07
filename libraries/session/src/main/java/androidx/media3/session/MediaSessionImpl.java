@@ -2218,15 +2218,15 @@ import org.checkerframework.checker.initialization.qual.Initialized;
     // NotificationCompat will scale the bitmaps on API < 27
     if (Build.VERSION.SDK_INT < 27) {
       try {
-        int maxWidth =
-            context
-                .getResources()
-                .getDimensionPixelSize(R.dimen.compat_notification_large_icon_max_width);
-        int maxHeight =
-            context
-                .getResources()
-                .getDimensionPixelSize(R.dimen.compat_notification_large_icon_max_height);
-        maxSize = max(maxSize, min(maxWidth, maxHeight));
+//        int maxWidth =
+//            context
+//                .getResources()
+//                .getDimensionPixelSize(R.dimen.compat_notification_large_icon_max_width);
+//        int maxHeight =
+//            context
+//                .getResources()
+//                .getDimensionPixelSize(R.dimen.compat_notification_large_icon_max_height);
+//        maxSize = max(maxSize, min(maxWidth, maxHeight));
       } catch (Resources.NotFoundException e) {
         // keep maxSize as is
       }

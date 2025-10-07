@@ -155,9 +155,9 @@ object MediaItemTree {
           mediaType = MediaMetadata.MEDIA_TYPE_FOLDER_GENRES,
         )
       )
+    treeNodes[ROOT_ID]!!.addChild(GENRE_ID)
     treeNodes[ROOT_ID]!!.addChild(ALBUM_ID)
     treeNodes[ROOT_ID]!!.addChild(ARTIST_ID)
-    treeNodes[ROOT_ID]!!.addChild(GENRE_ID)
 
     // Here, parse the json file in asset for media list.
     // We use a file in asset for demo purpose

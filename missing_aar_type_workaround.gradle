@@ -95,8 +95,8 @@ def addMissingAarTypeToXml(xml) {
                         // and search for your dependency inside Gradle Script dependencies.
                         // .aar files have @aar suffix at the end of their name,
                         // while .jar files have nothing.
-                        throw new IllegalStateException(
-                            dependencyName + " is not on the JAR or AAR list in missing_aar_type_workaround.gradle")
+//                        throw new IllegalStateException(
+//                            dependencyName + " is not on the JAR or AAR list in missing_aar_type_workaround.gradle")
                     }
                     boolean hasTypeDeclaration =
                         it.children().stream()

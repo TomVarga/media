@@ -18,6 +18,7 @@ package androidx.media3.demo.main;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -40,14 +41,18 @@ import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.TrackSelectionParameters;
 import androidx.media3.common.Tracks;
+import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSchemeDataSource;
 import androidx.media3.datasource.DataSource;
+import androidx.media3.demo.main.ads.AdsManager;
+import androidx.media3.demo.main.ads.AssetListLoadingDataSourceFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.RenderersFactory;
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManagerProvider;
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm;
+import androidx.media3.exoplayer.hls.HlsInterstitialsAdsLoader;
 import androidx.media3.exoplayer.ima.ImaAdsLoader;
 import androidx.media3.exoplayer.ima.ImaServerSideAdInsertionMediaSource;
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException;
@@ -59,12 +64,19 @@ import androidx.media3.exoplayer.source.ads.AdsLoader;
 import androidx.media3.exoplayer.util.DebugTextViewHelper;
 import androidx.media3.exoplayer.util.EventLogger;
 import androidx.media3.ui.PlayerView;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /** An activity that plays media using {@link ExoPlayer}. */
+@UnstableApi
 public class PlayerActivity extends AppCompatActivity
     implements OnClickListener, PlayerView.ControllerVisibilityListener {
 
@@ -84,6 +96,8 @@ public class PlayerActivity extends AppCompatActivity
   private boolean isShowingTrackSelectionDialog;
   private Button selectTracksButton;
   private DataSource.Factory dataSourceFactory;
+  private HlsInterstitialsAdsLoader hlsInterstitialsAdsLoader;
+  private AdsManager adsManager;
   private List<MediaItem> mediaItems;
   private TrackSelectionParameters trackSelectionParameters;
   private DebugTextViewHelper debugViewHelper;
@@ -282,6 +296,8 @@ public class PlayerActivity extends AppCompatActivity
       player.addAnalyticsListener(new EventLogger());
       player.setAudioAttributes(AudioAttributes.DEFAULT, /* handleAudioFocus= */ true);
       player.setPlayWhenReady(startAutoPlay);
+      hlsInterstitialsAdsLoader.setPlayer(player);
+      adsManager.setPlayer(player);
       playerView.setPlayer(player);
       configurePlayerWithServerSideAdsLoader();
       debugViewHelper = new DebugTextViewHelper(player, debugTextView);
@@ -293,12 +309,59 @@ public class PlayerActivity extends AppCompatActivity
     }
     player.setMediaItems(mediaItems, /* resetPosition= */ !haveStartPosition);
     player.prepare();
+    new Thread(this::resetPlaylistPlayout).start();
     String repeatModeExtra = intent.getStringExtra(IntentUtil.REPEAT_MODE_EXTRA);
     if (repeatModeExtra != null) {
       player.setRepeatMode(IntentUtil.parseRepeatModeExtra(repeatModeExtra));
     }
     updateButtonVisibility();
     return true;
+  }
+
+  private void resetPlaylistPlayout() {
+    String urlString = "http://192.168.1.10:5522/playback/play/v1/tuneSource";
+    HttpURLConnection connection = null;
+    try {
+      URL url = new URL(urlString);
+
+      connection = (HttpURLConnection) url.openConnection();
+
+      connection.setRequestMethod("GET");
+
+      connection.setConnectTimeout(5000); // 5 seconds for connection
+      connection.setReadTimeout(8000); // 8 seconds for reading response
+
+      int responseCode = connection.getResponseCode();
+
+      // 5. Read the response
+      if (responseCode == HttpURLConnection.HTTP_OK) { // 200 OK
+        try (BufferedReader in =
+            new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+          String inputLine;
+          StringBuilder response = new StringBuilder();
+          while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+          }
+        }
+      } else {
+        // Read error stream if response code is not OK
+        try (BufferedReader in =
+            new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
+          String inputLine;
+          StringBuilder errorResponse = new StringBuilder();
+          while ((inputLine = in.readLine()) != null) {
+            errorResponse.append(inputLine);
+          }
+        }
+      }
+    } catch (Exception e) {
+      Log.w("request", "An unexpected error occurred: ", e);
+    } finally {
+      // 6. Close the connection
+      if (connection != null) {
+        connection.disconnect();
+      }
+    }
   }
 
   @OptIn(markerClass = UnstableApi.class) // DRM configuration
@@ -318,12 +381,15 @@ public class PlayerActivity extends AppCompatActivity
             serverSideAdsLoader,
             new DefaultMediaSourceFactory(/* context= */ this)
                 .setDataSourceFactory(dataSourceFactory));
-    return new DefaultMediaSourceFactory(/* context= */ this)
-        .setDataSourceFactory(dataSourceFactory)
-        .setDrmSessionManagerProvider(drmSessionManagerProvider)
-        .setLocalAdInsertionComponents(
-            this::getClientSideAdsLoader, /* adViewProvider= */ playerView)
-        .setServerSideAdInsertionMediaSourceFactory(imaServerSideAdInsertionMediaSourceFactory);
+    DefaultMediaSourceFactory defaultMediaSourceFactory =
+        new DefaultMediaSourceFactory(/* context= */ this).setDataSourceFactory(dataSourceFactory);
+    hlsInterstitialsAdsLoader = new HlsInterstitialsAdsLoader(new AssetListLoadingDataSourceFactory());
+    adsManager = new AdsManager(hlsInterstitialsAdsLoader);
+    HlsInterstitialsAdsLoader.AdsMediaSourceFactory hlsAdsMediaSourceFactory =
+        new HlsInterstitialsAdsLoader.AdsMediaSourceFactory(
+            hlsInterstitialsAdsLoader, null, defaultMediaSourceFactory);
+//    return defaultMediaSourceFactory;
+    return hlsAdsMediaSourceFactory;
   }
 
   @OptIn(markerClass = UnstableApi.class)
@@ -562,9 +628,16 @@ public class PlayerActivity extends AppCompatActivity
   private static List<MediaItem> createMediaItems(Intent intent, DownloadTracker downloadTracker) {
     List<MediaItem> mediaItems = new ArrayList<>();
     for (MediaItem item : IntentUtil.createMediaItemsFromIntent(intent)) {
+      MediaItem newItem =
+          item.buildUpon()
+              .setAdsConfiguration(
+                  new MediaItem.AdsConfiguration.Builder(Uri.parse("hls://interstitials"))
+                      .setAdsId("ad-tag-" + UUID.randomUUID()) // must be unique within playlist
+                      .build())
+              .build();
       mediaItems.add(
           maybeSetDownloadProperties(
-              item, downloadTracker.getDownloadRequest(item.localConfiguration.uri)));
+              newItem, downloadTracker.getDownloadRequest(newItem.localConfiguration.uri)));
     }
     return mediaItems;
   }
