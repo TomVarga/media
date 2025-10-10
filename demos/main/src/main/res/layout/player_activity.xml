@@ -41,6 +41,12 @@
         android:textSize="10sp"
         tools:ignore="SmallSp"/>
 
+    <Button android:id="@+id/skipAd"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Skip ad"
+      android:enabled="true"/>
+
     <LinearLayout android:id="@+id/controls_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

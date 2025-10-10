@@ -1,6 +1,5 @@
 package androidx.media3.demo.main.ads;
 
-
 import static androidx.media3.common.Player.DISCONTINUITY_REASON_SEEK;
 
 import androidx.media3.common.AdPlaybackState;
@@ -21,60 +20,68 @@ public class AdsManager {
     this.hlsInterstitialsAdsLoader = hlsInterstitialsAdsLoader;
   }
 
+  private ExoPlayer player;
+
   public void setPlayer(ExoPlayer player) {
-    player.addListener(new Player.Listener() {
+    this.player = player;
+    player.addListener(
+        new Player.Listener() {
 
-      @Override
-      public void onPositionDiscontinuity(Player.PositionInfo oldPosition,
-          Player.PositionInfo newPosition, int reason) {
-        if (!isAd(oldPosition.adGroupIndex) && !isAd(newPosition.adGroupIndex)
-            && reason == DISCONTINUITY_REASON_SEEK) {
-          Timeline timeline = player.getCurrentTimeline();
-          Timeline.Period period = new Timeline.Period();
-          AdPlaybackState adPlaybackState = timeline.getPeriod(
-              player.getCurrentPeriodIndex(),
-              period,
-              true
-          ).adPlaybackState;
-          int adGroupCount = adPlaybackState.adGroupCount;
-          if (adGroupCount > 0) {
-            firstUpdate = false;
-            Log.d("AdsManager", "onPositionDiscontinuity adGroupCount " + adGroupCount);
-            for (int i = 0; i < adGroupCount; i++) {
-              if (!adPlaybackState.isLivePostrollPlaceholder(i)) {
-                hlsInterstitialsAdsLoader.setWithAvailableAdGroup(i);
+          @Override
+          public void onPositionDiscontinuity(
+              Player.PositionInfo oldPosition, Player.PositionInfo newPosition, int reason) {
+            if (!isAd(oldPosition.adGroupIndex)
+                && !isAd(newPosition.adGroupIndex)
+                && reason == DISCONTINUITY_REASON_SEEK) {
+              Timeline timeline = player.getCurrentTimeline();
+              Timeline.Period period = new Timeline.Period();
+              AdPlaybackState adPlaybackState =
+                  timeline.getPeriod(player.getCurrentPeriodIndex(), period, true).adPlaybackState;
+              int adGroupCount = adPlaybackState.adGroupCount;
+              if (adGroupCount > 0) {
+                //            firstUpdate = false;
+                Log.d("AdsManager", "onPositionDiscontinuity adGroupCount " + adGroupCount);
+                for (int i = 0; i < adGroupCount; i++) {
+                  if (!adPlaybackState.isLivePostrollPlaceholder(i)) {
+                    hlsInterstitialsAdsLoader.setWithAvailableAdGroup(i);
+                  }
+                }
               }
             }
           }
 
-        }
-      }
+          private boolean isAd(int index) {
+            return index != -1;
+          }
 
-      private boolean isAd(int index) {
-        return index != -1;
-      }
-
-      @Override
-      public void onTimelineChanged(Timeline timeline, int reason) {
-        if (!timeline.isEmpty() && firstUpdate) {
-          Timeline.Period period = new Timeline.Period();
-          AdPlaybackState adPlaybackState = timeline.getPeriod(
-              player.getCurrentPeriodIndex(),
-              period,
-              true
-          ).adPlaybackState;
-          int adGroupCount = adPlaybackState.adGroupCount;
-          if (adGroupCount > 0) {
-            firstUpdate = false;
-            Log.d("AdsManager", "setWithSkippedAdGroup adGroupCount " + adGroupCount);
-            for (int i = 0; i < adGroupCount; i++) {
-              if (!adPlaybackState.isLivePostrollPlaceholder(i)) {
-                hlsInterstitialsAdsLoader.setWithSkippedAdGroup(i);
-              }
+          @Override
+          public void onTimelineChanged(Timeline timeline, int reason) {
+            if (!timeline.isEmpty() && firstUpdate) {
+              skip(timeline, player);
             }
           }
+        });
+  }
+
+  public void skipAd() {
+    Log.d("AdsManager", "setWithSkippedAdGroup for skip");
+    Timeline timeline = player.getCurrentTimeline();
+    skip(timeline, player);
+  }
+
+  private void skip(Timeline timeline, ExoPlayer player) {
+    Timeline.Period period = new Timeline.Period();
+    AdPlaybackState adPlaybackState =
+        timeline.getPeriod(player.getCurrentPeriodIndex(), period, true).adPlaybackState;
+    int adGroupCount = adPlaybackState.adGroupCount;
+    if (adGroupCount > 0) {
+      firstUpdate = false;
+      Log.d("AdsManager", "setWithSkippedAdGroup adGroupCount " + adGroupCount);
+      for (int i = 0; i < adGroupCount; i++) {
+        if (!adPlaybackState.isLivePostrollPlaceholder(i)) {
+          hlsInterstitialsAdsLoader.setWithSkippedAdGroup(i);
         }
       }
-    });
+    }
   }
 }

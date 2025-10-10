@@ -5,21 +5,24 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.BaseDataSource;
 import androidx.media3.datasource.DataSpec;
 import androidx.media3.exoplayer.hls.HlsInterstitialsAdsLoader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-@UnstableApi class AssetListDataSource extends BaseDataSource {
+@UnstableApi
+class AssetListDataSource extends BaseDataSource {
 
   private Uri currentUri;
   private ByteArrayInputStream inputStream;
   private boolean opened = false;
+  private static final String BASE_URL = "https://tomvarga.github.io/HLS-test-stream/";
+  private static final long DURATION_5 = 5039000;
+  private static final long DURATION_10 = 10005000;
 
   /**
    * Creates base data source.
@@ -34,24 +37,22 @@ import java.nio.charset.StandardCharsets;
   public long open(DataSpec dataSpec) throws IOException {
     currentUri = dataSpec.uri;
     opened = true;
-
-    // Assuming loadAssetList returns a List<Asset>
     List<HlsInterstitialsAdsLoader.Asset> assetList = new ArrayList<>();
-    assetList.add(
-        new HlsInterstitialsAdsLoader.Asset(
-          Uri.parse("https://tomvarga.github.io/HLS-test-stream/5/audio.m3u8"),
-          5039000
-    ));
-    assetList.add(
-        new HlsInterstitialsAdsLoader.Asset(
-            Uri.parse("https://tomvarga.github.io/HLS-test-stream/10/audio.m3u8"),
-            10005000
-        ));
-    assetList.add(
-        new HlsInterstitialsAdsLoader.Asset(
-            Uri.parse("https://tomvarga.github.io/HLS-test-stream/10/audio.m3u8"),
-            10005000
-        ));
+
+    String interstitialIdString = dataSpec.uri.getQueryParameter("_HLS_interstitial_id");
+
+    if (interstitialIdString == null || interstitialIdString.isEmpty()) {
+      return dataSpec.length;
+    }
+
+    String[] idParts = interstitialIdString.split("_");
+    if (idParts.length == 0) {
+      handlePart(interstitialIdString, assetList);
+    } else {
+      for (String idPart : idParts) {
+        handlePart(idPart, assetList);
+      }
+    }
 
     JSONArray innerJsonArray = new JSONArray();
     try {
@@ -75,6 +76,20 @@ import java.nio.charset.StandardCharsets;
     }
 
     return dataSpec.length;
+  }
+
+  private static void handlePart(String idPart, List<HlsInterstitialsAdsLoader.Asset> assetList) {
+    switch (idPart) {
+      case "5":
+        assetList.add(
+            new HlsInterstitialsAdsLoader.Asset(Uri.parse(BASE_URL + "5/audio.m3u8"), DURATION_5));
+        break;
+      case "10":
+        assetList.add(
+            new HlsInterstitialsAdsLoader.Asset(
+                Uri.parse(BASE_URL + "10/audio.m3u8"), DURATION_10));
+        break;
+    }
   }
 
   @Override

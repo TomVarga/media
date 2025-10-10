@@ -91,6 +91,7 @@ public class PlayerActivity extends AppCompatActivity
   protected PlayerView playerView;
   protected LinearLayout debugRootView;
   protected TextView debugTextView;
+  protected Button skipAdButton;
   protected @Nullable ExoPlayer player;
 
   private boolean isShowingTrackSelectionDialog;
@@ -125,6 +126,8 @@ public class PlayerActivity extends AppCompatActivity
     setContentView();
     debugRootView = findViewById(R.id.controls_root);
     debugTextView = findViewById(R.id.debug_text_view);
+    skipAdButton = findViewById(R.id.skipAd);
+    skipAdButton.setOnClickListener(this);
     selectTracksButton = findViewById(R.id.select_tracks_button);
     selectTracksButton.setOnClickListener(this);
 
@@ -257,6 +260,9 @@ public class PlayerActivity extends AppCompatActivity
               /* onDismissListener= */ dismissedDialog -> isShowingTrackSelectionDialog = false);
       trackSelectionDialog.show(getSupportFragmentManager(), /* tag= */ null);
     }
+    if (view == skipAdButton) {
+      adsManager.skipAd();
+    }
   }
 
   // PlayerView.ControllerVisibilityListener implementation
@@ -384,6 +390,7 @@ public class PlayerActivity extends AppCompatActivity
     DefaultMediaSourceFactory defaultMediaSourceFactory =
         new DefaultMediaSourceFactory(/* context= */ this).setDataSourceFactory(dataSourceFactory);
     hlsInterstitialsAdsLoader = new HlsInterstitialsAdsLoader(new AssetListLoadingDataSourceFactory());
+//    hlsInterstitialsAdsLoader = new HlsInterstitialsAdsLoader(this);
     adsManager = new AdsManager(hlsInterstitialsAdsLoader);
     HlsInterstitialsAdsLoader.AdsMediaSourceFactory hlsAdsMediaSourceFactory =
         new HlsInterstitialsAdsLoader.AdsMediaSourceFactory(

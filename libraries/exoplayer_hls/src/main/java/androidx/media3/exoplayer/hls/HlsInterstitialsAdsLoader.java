@@ -164,7 +164,7 @@ public final class HlsInterstitialsAdsLoader implements AdsLoader {
     public final long durationUs;
 
     /** Creates an instance. */
-    /* package */ Asset(Uri uri, long durationUs) {
+    public Asset(Uri uri, long durationUs) {
       this.uri = uri;
       this.durationUs = durationUs;
     }
