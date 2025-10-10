@@ -235,6 +235,10 @@
     "name": "HLS",
     "samples": [
       {
+        "name": "Live sliding interstitial count",
+        "uri": "http://192.168.1.10:5522/count/playlist.m3u8"
+      },
+      {
         "name": "Live sliding interstitital",
         "uri": "http://192.168.1.10:5522/ride_multi_int/playlist.m3u8"
       },
