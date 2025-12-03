@@ -92,6 +92,7 @@ public class PlayerActivity extends AppCompatActivity
   protected LinearLayout debugRootView;
   protected TextView debugTextView;
   protected Button skipAdButton;
+  protected Button seekToAdButton;
   protected @Nullable ExoPlayer player;
 
   private boolean isShowingTrackSelectionDialog;
@@ -127,7 +128,9 @@ public class PlayerActivity extends AppCompatActivity
     debugRootView = findViewById(R.id.controls_root);
     debugTextView = findViewById(R.id.debug_text_view);
     skipAdButton = findViewById(R.id.skipAd);
+    seekToAdButton = findViewById(R.id.seekToAd);
     skipAdButton.setOnClickListener(this);
+    seekToAdButton.setOnClickListener(this);
     selectTracksButton = findViewById(R.id.select_tracks_button);
     selectTracksButton.setOnClickListener(this);
 
@@ -260,8 +263,11 @@ public class PlayerActivity extends AppCompatActivity
               /* onDismissListener= */ dismissedDialog -> isShowingTrackSelectionDialog = false);
       trackSelectionDialog.show(getSupportFragmentManager(), /* tag= */ null);
     }
-    if (view == skipAdButton) {
+    else if (view == skipAdButton) {
       adsManager.skipAd();
+    }
+    else if (view == seekToAdButton) {
+      adsManager.seekToAd();
     }
   }
 

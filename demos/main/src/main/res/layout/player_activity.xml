@@ -44,7 +44,13 @@
     <Button android:id="@+id/skipAd"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Skip ad"
+      android:text="Skip AD"
+      android:enabled="true"/>
+
+    <Button android:id="@+id/seekToAd"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Seek to AD"
       android:enabled="true"/>
 
     <LinearLayout android:id="@+id/controls_root"

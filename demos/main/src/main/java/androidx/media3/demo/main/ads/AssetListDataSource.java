@@ -1,6 +1,7 @@
 package androidx.media3.demo.main.ads;
 
 import android.net.Uri;
+import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.BaseDataSource;
 import androidx.media3.datasource.DataSpec;
@@ -9,7 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,22 +37,22 @@ class AssetListDataSource extends BaseDataSource {
   public long open(DataSpec dataSpec) throws IOException {
     currentUri = dataSpec.uri;
     opened = true;
-    List<HlsInterstitialsAdsLoader.Asset> assetList = new ArrayList<>();
+    ArrayList<HlsInterstitialsAdsLoader.Asset> assetList = new ArrayList<>();
 
-    String interstitialIdString = dataSpec.uri.getQueryParameter("_HLS_interstitial_id");
-
-    if (interstitialIdString == null || interstitialIdString.isEmpty()) {
+    String podDuration = dataSpec.uri.getQueryParameter("_pod_duration");
+    if (podDuration == null) {
       return dataSpec.length;
     }
+    Double podDurationS = Double.valueOf(podDuration);
 
-    String[] idParts = interstitialIdString.split("_");
-    if (idParts.length == 0) {
-      handlePart(interstitialIdString, assetList);
-    } else {
-      for (String idPart : idParts) {
-        handlePart(idPart, assetList);
-      }
+    handlePart(podDurationS, assetList);
+    StringBuilder assetListString = new StringBuilder();
+    for (HlsInterstitialsAdsLoader.Asset asset : assetList) {
+      assetListString.append(asset.uri).append("\n");
     }
+    Log.w(
+        "AssetListDataSource",
+        "podDurationS " + podDurationS + " AssetListDataSource " + assetListString);
 
     JSONArray innerJsonArray = new JSONArray();
     try {
@@ -78,17 +78,32 @@ class AssetListDataSource extends BaseDataSource {
     return dataSpec.length;
   }
 
-  private static void handlePart(String idPart, List<HlsInterstitialsAdsLoader.Asset> assetList) {
-    switch (idPart) {
-      case "5":
+  private static void handlePart(
+      Double podDurationS, ArrayList<HlsInterstitialsAdsLoader.Asset> assetList) {
+    double remainingDuration = podDurationS * 1_000_000;
+    boolean useFiveSecond = true;
+
+    while (remainingDuration > 0) {
+      if (useFiveSecond && remainingDuration >= DURATION_5) {
         assetList.add(
             new HlsInterstitialsAdsLoader.Asset(Uri.parse(BASE_URL + "5/audio.m3u8"), DURATION_5));
-        break;
-      case "10":
+        remainingDuration -= DURATION_5;
+      } else if (!useFiveSecond && remainingDuration >= DURATION_10) {
         assetList.add(
             new HlsInterstitialsAdsLoader.Asset(
                 Uri.parse(BASE_URL + "10/audio.m3u8"), DURATION_10));
+        remainingDuration -= DURATION_10;
+      } else if (remainingDuration >= DURATION_5) {
+        // If we can't fit the current choice, try the 5-second asset
+        assetList.add(
+            new HlsInterstitialsAdsLoader.Asset(Uri.parse(BASE_URL + "5/audio.m3u8"), DURATION_5));
+        remainingDuration -= DURATION_5;
+      } else {
+        // Can't fit any more assets
         break;
+      }
+
+      useFiveSecond = !useFiveSecond;
     }
   }
 
