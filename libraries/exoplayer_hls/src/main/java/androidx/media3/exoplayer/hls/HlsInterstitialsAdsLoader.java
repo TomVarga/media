@@ -1160,6 +1160,7 @@ public final class HlsInterstitialsAdsLoader implements AdsLoader {
     Window window = contentTimeline.getWindow(windowIndex, new Window());
     long currentPeriodPositionUs = positionInFirstPeriodUs + windowPositionUs;
     RunnableAtPosition nextAssetResolution = getNextAssetResolution(adsId, currentPeriodPositionUs);
+    Log.d("tvarga", "nextAssetResolution: " + nextAssetResolution);
     if (nextAssetResolution == null) {
       return;
     }
@@ -1781,6 +1782,7 @@ public final class HlsInterstitialsAdsLoader implements AdsLoader {
         long assetListWindowPositionUs =
             getUnresolvedAssetListWindowPositionForContentPositionUs(
                 windowPositionUs, currentTimeline, newPosition.periodIndex);
+        Log.d("tvarga", "onPositionDiscontinuity: seek assetListWindowPositionUs " + assetListWindowPositionUs);
         maybeExecuteOrSetNextAssetListResolutionMessage(
             adsId,
             currentTimeline,

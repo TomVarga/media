@@ -51,7 +51,7 @@ class AssetListDataSource extends BaseDataSource {
       assetListString.append(asset.uri).append("\n");
     }
     Log.w(
-        "AssetListDataSource",
+        "tvarga",
         "podDurationS " + podDurationS + " AssetListDataSource " + assetListString);
 
     JSONArray innerJsonArray = new JSONArray();

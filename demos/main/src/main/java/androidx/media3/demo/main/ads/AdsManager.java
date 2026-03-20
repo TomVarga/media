@@ -45,6 +45,28 @@ public class AdsManager {
               if (adGroupCount > 0) {
                 //            firstUpdate = false;
                 Log.d("AdsManager", "onPositionDiscontinuity adGroupCount " + adGroupCount);
+                StringBuilder adAssetUrls = new StringBuilder();
+                for (int i = 0; i < adGroupCount; i++) {
+                  AdPlaybackState.AdGroup adGroup = adPlaybackState.getAdGroup(i);
+                  for (int j = 0; j < adGroup.mediaItems.length; j++) {
+                    if (adGroup.mediaItems[j] != null) {
+                      adAssetUrls
+                          .append(" [Group ")
+                          .append(i)
+                          .append(" Ad ")
+                          .append(j)
+                          .append(": ")
+                          .append(adGroup.mediaItems[j])
+                          .append("]");
+                    }
+                  }
+                }
+                Log.d(
+                    "AdsManager",
+                    "onPositionDiscontinuity adGroupCount "
+                        + adGroupCount
+                        + " adAssetUrls"
+                        + adAssetUrls);
                 for (int i = 0; i < adGroupCount; i++) {
                   if (!adPlaybackState.isLivePostrollPlaceholder(i)) {
                     hlsInterstitialsAdsLoader.setWithAvailableAdGroup(i);
@@ -61,6 +83,7 @@ public class AdsManager {
           @Override
           public void onTimelineChanged(Timeline timeline, int reason) {
             if (!timeline.isEmpty() && firstUpdate) {
+              Log.d("AdsManager", "setWithSkippedAdGroup for firstUpdate");
               skip(timeline, player);
             }
           }
