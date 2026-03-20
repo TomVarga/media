@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <debug-overrides>
+    <trust-anchors>
+      <!-- Trust user added CAs while debuggable only -->
+      <certificates src="user" />
+    </trust-anchors>
+  </debug-overrides>
+  <base-config cleartextTrafficPermitted="true">
+    <trust-anchors>
+      <!-- Added user cert to enable easier testing for QE -->
+      <certificates src="user" />
+      <certificates src="@raw/debug_ssl" />
+      <certificates src="system" />
+    </trust-anchors>
+  </base-config>
+</network-security-config>

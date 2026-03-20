@@ -89,3 +89,5 @@ libraries/decoder_iamf/src/main/jni/nativelib
 
 # MPEG-H decoder extension
 libraries/decoder_mpegh/src/main/jni/libmpegh
+
+**/debug_ssl.crt

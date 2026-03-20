@@ -235,6 +235,38 @@
     "name": "HLS",
     "samples": [
       {
+        "name": "Live sliding interstitital",
+        "uri": "http://192.168.1.10:5522/ride_multi_int/playlist.m3u8"
+      },
+      {
+        "name": "Live interstitital full",
+        "uri": "https://raw.githubusercontent.com/TomVarga/HLS-test-stream/refs/heads/main/ride/audio_full_2.m3u8"
+      },
+      {
+        "name": "Live interstitital almost full",
+        "uri": "http://192.168.1.10:5522/ride_multi_int/audio_almost_full.m3u8"
+      },
+      {
+        "name": "Live interstitital almost full single",
+        "uri": "https://raw.githubusercontent.com/TomVarga/HLS-test-stream/refs/heads/main/ride/audio_almost_full_single.m3u8"
+      },
+      {
+        "name": "Live interstitital",
+        "uri": "https://raw.githubusercontent.com/TomVarga/HLS-test-stream/refs/heads/main/ride/audio.m3u8"
+      },
+      {
+        "name": "Live interstitital BM",
+        "uri": "https://livepoc-ftc-eng-device.streaming.siriusxm.com/v0/breakglass_SoiPMdM5tig/s3-ltp-dev/mce-segments-s3/wmay/channels/adslive/mv_long.m3u8"
+      },
+      {
+        "name": "Live interstitital SXM",
+        "uri": "https://live-akc-prod-device.streaming.siriusxm.com/v1/763a312c70733a322c70653a342c616c673a312c657870736c3a312c73657373696f6e69643a61366632666232362d636561382d346335322d393930382d6466626633356163663336312c70726f66696c6569643a61396661666339382d626436632d343266392d396465312d6435313262323031363463372c646576696365706c6174666f726d3a616e64726f69642c6964656e7469747949643a34396165653439632d393032332d343161612d383862312d363561353534366262643733_1750751942-1750752242_9db564cc3c1c02d8a0f541eae55ff928155951b5/tpac_iad_s3_us_east_1/shessofunny/196/unenc/mv_long.m3u8"
+      },
+      {
+        "name": "Live interstitital SXM int removed",
+        "uri": "http://192.168.1.10:5522/noint/intremoved.m3u8"
+      },
+      {
         "name": "Apple 4x3 basic stream (TS)",
         "uri": "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8"
       },
